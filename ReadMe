@@ -1,0 +1,165 @@
+# Clean Room Compliance Using Computer Vision
+
+A computer vision system that monitors clean room compliance by detecting proper PPE usage (hairnets and masks) and verifying handwashing procedures using MediaPipe and YOLO object detection.
+
+## Features
+
+- **PPE Detection**: Identifies whether personnel are wearing required safety equipment
+  - Hairnet detection
+  - Mask detection
+- **Hand Washing Verification**: Tracks hand placement in designated wash zones with a 5-second countdown timer
+- **Real-time Processing**: Analyzes video streams for compliance monitoring
+- **Visual Feedback**: Displays bounding boxes and labels for detected objects and hands
+
+## Requirements
+
+```bash
+opencv-python
+mediapipe
+ultralytics
+```
+
+## Installation
+
+1. Clone this repository:
+```bash
+git clone https://github.com/Kdayma00/cleanroom-compliance.git
+cd cleanroom-compliance
+```
+
+2. Install required dependencies:
+```bash
+pip install opencv-python mediapipe ultralytics
+```
+
+3. Download or train your YOLO model and save it as `trainedyolo11n.pt` in the project directory.
+
+## Usage
+
+### Running in Google Colab
+
+1. Upload the notebook to Google Colab
+2. Run the installation cell to install dependencies
+3. Upload your video file when prompted
+4. The system will process the video and display:
+   - Green bounding boxes for detected hairnets and masks (compliant)
+   - Red bounding boxes for other detected objects (non-compliant)
+   - Hand tracking within the designated washing zone
+   - Countdown timer for handwashing duration
+
+### Running Locally
+
+```python
+python clean_room.py
+```
+
+Make sure to modify the video input source in the code:
+```python
+cap = cv2.VideoCapture("your_video_file.mp4")
+```
+
+## How It Works
+
+### Hand Detection Zone
+- Defines a rectangular zone in the lower portion of the frame (bottom 35% of the screen)
+- Tracks hand landmarks using MediaPipe Hands
+- Monitors hand presence for a minimum of 5 seconds
+- Provides real-time countdown feedback
+
+### PPE Detection
+- Uses a trained YOLO model to detect:
+  - Class 1: Hairnet
+  - Class 2: Mask
+  - Classes 4 & 5: Other defined objects
+- Color-coded visualization:
+  - **Green**: Compliant items (hairnet, mask)
+  - **Red**: Non-compliant items
+
+### Frame Processing
+- Processes every 3rd frame for optimized performance
+- Real-time visualization of detection results
+- Displays status messages and countdown timer
+
+## Model Classes
+
+The YOLO model is configured to detect the following classes:
+- **Class 1**: Hairnet
+- **Class 2**: Mask
+- **Class 4**: (Define based on your training)
+- **Class 5**: (Define based on your training)
+
+## Configuration
+
+Key parameters you can adjust:
+
+```python
+# Hand detection confidence
+min_detection_confidence=0.1
+min_tracking_confidence=0.1
+
+# Maximum hands to detect
+max_num_hands=2
+
+# Handwashing duration (in seconds)
+countdown = 5
+
+# Detection zone (adjustable percentages)
+zone_x_min = int(frame_width * 0.1)  # Left boundary
+zone_y_min = int(frame_height * 0.65)  # Top boundary
+zone_x_max = int(frame_width * 0.9)  # Right boundary
+zone_y_max = int(frame_height * 1)  # Bottom boundary
+```
+
+## Project Structure
+
+```
+cleanroom-compliance/
+│
+├── clean_room.py           # Main script
+├── trainedyolo11n.pt       # Trained YOLO model (you need to provide this)
+├── README.md               # This file
+└── requirements.txt        # Python dependencies
+```
+
+## Training Your Own Model
+
+To train a custom YOLO model for your specific clean room requirements:
+
+1. Collect and label images of:
+   - Personnel wearing hairnets
+   - Personnel wearing masks
+   - Other relevant PPE or objects
+2. Use the Ultralytics YOLO framework to train your model
+3. Save the trained weights as `trainedyolo11n.pt`
+
+## Limitations
+
+- Requires adequate lighting for reliable detection
+- Hand detection accuracy depends on MediaPipe's performance
+- YOLO model accuracy depends on training data quality
+- Frame processing rate is limited to every 3rd frame for performance
+
+## Future Enhancements
+
+- [ ] Add audio alerts for non-compliance
+- [ ] Implement logging and reporting features
+- [ ] Support for multiple camera feeds
+- [ ] Dashboard for compliance statistics
+- [ ] Integration with access control systems
+- [ ] Real-time alerts to supervisors
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- MediaPipe by Google for hand detection
+- Ultralytics for YOLO implementation
+- OpenCV community for computer vision 
+
+**Note**: Make sure to comply with privacy regulations and obtain necessary permissions when deploying surveillance systems in workplace environments.
